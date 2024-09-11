@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout</title>
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background-color: #111317;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .logout-container {
+            background-color: #1f2125;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #confirmLogout {
+            background-color: #f9ac54;
+            color: #ffffff;
+        }
+
+        #confirmLogout:hover {
+            background-color: #d79447;
+        }
+
+        #cancelLogout {
+            background-color: #35373b;
+            color: #ffffff;
+        }
+
+        #cancelLogout:hover {
+            background-color: #2a2c2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        <h1>Are you sure you want to log out?</h1>
+        <button id="confirmLogout">Yes, Logout</button>
+        <button id="cancelLogout">Cancel</button>
+    </div>
+
+    <script>
+        document.getElementById('confirmLogout').addEventListener('click', function() {
+            // Redirect to the dashboard page
+            window.location.href = 'dashboard.html';
+        });
+
+        document.getElementById('cancelLogout').addEventListener('click', function() {
+            // Go back to the previous page
+            window.history.back();
+        });
+    </script>
+</body>
+</html>
