@@ -54,29 +54,82 @@ $conn->close();
             color: #ffffff; /* White text color */
             margin: 0; /* Remove default margin */
             padding: 0; /* Remove default padding */
-           
+            background-color: #000000; /* Black background color */
         }
-        .total-text {
-            position: fixed; /* Fixes the position of the box */
+        .chart-container {
+            position: fixed; /* Fixes the position of the chart */
             top: 20px; /* Distance from the top of the viewport */
-            left: 50%; /* Horizontally center the box */
-            transform: translateX(-50%); /* Adjust the box's position to be centered */
-            background-color:transparent; /* Slightly less transparent background for the container */
+            left: 50%; /* Horizontally center the chart */
+            transform: translateX(-50%); /* Adjust the chart's position to be centered */
+            width: 80%; /* Set width of the chart container */
+            max-width: 600px; /* Maximum width of the chart container */
+            background-color: #1e1e1e; /* Slightly less black background for the container */
             padding: 20px; /* Add some padding inside the container */
             border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for better visibility */
-            z-index: 1000; /* Ensures the box is on top of other elements */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Subtle shadow for better visibility */
+            z-index: 1000; /* Ensures the chart is on top of other elements */
         }
         h2 {
             margin-bottom: 10px; /* Adjust margin for the heading */
+            color: #f39c12; /* Orange color for heading */
+            text-align: center; /* Center align the heading */
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="total-text">
-        <h2>Total Income</h2>
-        <p>Bank: RM<?php echo htmlspecialchars(number_format($totals['Bank'], 2)); ?></p>
-        <p>Cash: RM<?php echo htmlspecialchars(number_format($totals['Cash'], 2)); ?></p>
+    <div class="chart-container">
+        <canvas id="incomeChart"></canvas>
     </div>
+    <script>
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        const incomeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Cash', 'Bank'],
+                datasets: [{
+                    label: 'Total Income (RM)',
+                    data: [<?php echo htmlspecialchars($totals['Cash']); ?>, <?php echo htmlspecialchars($totals['Bank']); ?>],
+                    backgroundColor: [
+                       'rgba(255, 99, 132, 0.2)', // Different color for Cash
+                        'rgba(54, 162, 235, 0.2)'  // Different color for Bank
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)', // Border color for Cash
+                        'rgba(54, 162, 235, 1)'  // Border color for Bank
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false // Hide the legend box
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.dataset.label + ': RM' + tooltipItem.raw;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        display: true,
+                        color: '#f39c12',
+                        anchor: 'end',
+                        align: 'top',
+                        formatter: function(value) {
+                            return 'RM' + value;
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
