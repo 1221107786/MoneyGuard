@@ -5,152 +5,289 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Currency Converter</title>
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+        body {
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: url('https://i.gifer.com/7D7o.gif') no-repeat center center fixed;
+            background-size: cover;
+        }
 
-:root {
-    --primary-color: #111317;
-    --primary-color-light: #1f2125;
-    --primary-color-extra-light: #35373b;
-    --secondary-color: #f9ac54;
-    --secondary-color-dark: #d79447;
-    --text-light: #d1d5db;
-    --white: #ffffff;
-    --max-width: 1200px;
-}
+        header {
+            background: rgba(255, 140, 0, 0.8); /* Semi-transparent gradient */
+            padding: 1em;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+            border-bottom: 2px solid #fff;
+            position: relative;
+            z-index: 1; /* Ensure header is above the background */
+        }
 
-* {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-}
+        h1 {
+            margin: 0;
+            font-size: 2.8em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 7px rgba(0, 0, 0, 0.7);
+            color: #fff;
+        }
 
-body {
-    font-family: "Poppins", sans-serif;
-    background-color: var(--primary-color);
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 2em auto;
+            padding: 2em;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 1s ease-out;
+            z-index: 1; /* Ensure main content is above the background */
+        }
+
+        form {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-}
-
-.converter-container {
-    position: relative;
-    background: var(--primary-color-light);
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 400px; /* Adjusted width */
-    text-align: center;
-    z-index: 1; /* Ensure container content is above the pseudo-element */
-}
-
-.converter-container::before {
-    content: "CURRENCY"; /* Add more currencies as needed */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 6rem; /* Adjust size as needed */
-    color: var(--primary-color-extra-light);
-    opacity: 0.2; /* Adjust opacity for blur effect */
-    z-index: -1; /* Ensure background text is behind the container */
-    pointer-events: none; /* Allow clicks to pass through */
-    user-select: none; /* Prevent text selection */
-    filter: blur(10px); /* Blur effect */
-    white-space: nowrap; /* Prevent text from wrapping */
-}
-
-h1 {
-    margin-bottom: 20px;
-    font-size: 2.25rem;
-    font-weight: 600;
-    color: var(--white);
-}
-
-label {
-    display: block;
-    margin: 10px 0 5px;
-    font-weight: 500;
-    color: var(--text-light);
-}
-
-input, select {
+    gap: 1em;
     width: 100%;
-    padding: 10px;
-    border: 1px solid var(--primary-color-extra-light);
-    border-radius: 4px;
-    font-size: 1rem;
-    margin-bottom: 15px;
-    background-color: var(--primary-color-light);
-    color: var(--white);
+}
+
+select {
+    width: 100%;
+    max-width: 320px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #0b0b0b;
+    border: 1px solid #ff8c00;
+    border-radius: 15px; /* Ensure rounded corners */
+    padding: 0.75em;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+select:focus {
+    outline: none; /* Remove default focus outline */
+    border-color: #e07b00; /* Highlight border on focus */
 }
 
 button {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--secondary-color);
-    color: var(--white);
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
+    background: linear-gradient(135deg, #ff8c00, #e07b00);
+    color: #fff;
     cursor: pointer;
-    transition: 0.3s;
+    border: none;
+    padding: 0.75em 2em;
+    border-radius: 25px;
+    font-weight: 700;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.3s ease;
+    z-index: 0;
+}
+
+button:hover::before {
+    transform: translate(-50%, -50%) scale(1);
 }
 
 button:hover {
-    background-color: var(--secondary-color-dark);
+    background: linear-gradient(135deg, #e07b00, #ff8c00);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
+    transform: scale(1.05);
 }
 
-h2 {
-    margin-top: 20px;
-    font-size: 1.5rem;
-    color: var(--white);
+#result {
+    margin-top: 1em;
+    font-size: 1.5em;
+    font-weight: 500;
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
 }
 
-@media (max-width: 900px) {
-    .converter-container {
-        width: 90%;
-    }
+footer {
+    text-align: center;
+    margin-top: 2em;
 }
 
-@media (max-width: 600px) {
-    .converter-container {
-        width: 100%;
-        padding: 10px;
-    }
+footer button {
+    background: linear-gradient(135deg, #ff8c00, #e07b00);
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    padding: 0.75em 2em;
+    border-radius: 25px;
+    font-weight: 700;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
+footer button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.3s ease;
+    z-index: 0;
+}
+
+footer button:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+footer button:hover {
+    background: linear-gradient(135deg, #e07b00, #ff8c00);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
+    transform: scale(1.05);
+}
+
+input[type="number"] {
+    width: 100%;
+    max-width: 320px;
+    padding: 0.75em;
+    font-size: 1em;
+    border: 1px solid #ff8c00;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+    outline: none; /* Remove default outline */
+}
+
+/* Focus state for input */
+input[type="number"]:focus {
+    border-color: #e07b00; /* Highlight border on focus */
+    background: rgba(255, 255, 255, 0.3);
+}
+   
     </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div class="converter-container">
+    <header>
         <h1>Currency Converter</h1>
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" placeholder="Enter amount" />
+    </header>
+    <main>
+        <form id="converter-form">
+            <input type="number" id="amount" placeholder="Amount" required>
+            <select id="from-currency" class="select2">
+                <!-- Options populated via JavaScript -->
+            </select>
+            <select id="to-currency" class="select2">
+                <!-- Options populated via JavaScript -->
+            </select>
+            <button type="submit">Convert</button>
+        </form>
+        <div id="result">
+            <!-- Conversion result displayed here -->
+        </div>
+        <footer>
+            <button id="refresh">Refresh Rates</button>
+            <button onclick="location.href='dashboard.html'">Back</button>
+        </footer>
+    </main>
 
-        <label for="from-currency">From Currency:</label>
-        <select id="from-currency">
-            <option value="MYR">MYR</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-        </select>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
+    <script>
+        const apiUrl = 'https://api.exchangerate-api.com/v4/latest/USD'; // Replace with your API endpoint
 
-        <label for="to-currency">To Currency:</label>
-        <select id="to-currency">
-            <option value="MYR">MYR</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-        </select>
+        async function fetchRates() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                console.log('Fetched rates:', data); // Debugging line
+                return data;
+            } catch (error) {
+                console.error('Error fetching rates:', error);
+                return null;
+            }
+        }
 
-        <button onclick="convertCurrency()">Convert</button>
+        function populateCurrencyOptions(currencies) {
+            const fromCurrency = document.getElementById('from-currency');
+            const toCurrency = document.getElementById('to-currency');
+            
+            fromCurrency.innerHTML = '';
+            toCurrency.innerHTML = '';
+            
+            for (const [currencyCode, currencyName] of Object.entries(currencies)) {
+                const option = document.createElement('option');
+                option.value = currencyCode;
+                option.textContent = `${currencyCode} - ${currencyName}`;
+                fromCurrency.appendChild(option);
+                
+                const option2 = option.cloneNode(true);
+                toCurrency.appendChild(option2);
+            }
 
-        <h2 id="result"></h2>
-    </div>
+            // Initialize Select2 after populating options
+            $('#from-currency').select2();
+            $('#to-currency').select2();
+        }
 
-    <script src="currency.js"></script>
+        async function convertCurrency(event) {
+            event.preventDefault();
+            
+            const amount = document.getElementById('amount').value;
+            const fromCurrency = document.getElementById('from-currency').value;
+            const toCurrency = document.getElementById('to-currency').value;
+            
+            const rates = await fetchRates();
+            
+            if (rates && fromCurrency in rates.rates && toCurrency in rates.rates) {
+                const rate = rates.rates[toCurrency] / rates.rates[fromCurrency];
+                const convertedAmount = amount * rate;
+                document.getElementById('result').textContent = `Converted Amount: ${convertedAmount.toFixed(2)} ${toCurrency}`;
+            } else {
+                document.getElementById('result').textContent = 'Error converting currency.';
+            }
+        }
+
+        document.getElementById('converter-form').addEventListener('submit', convertCurrency);
+        document.getElementById('refresh').addEventListener('click', async () => {
+            const rates = await fetchRates();
+            if (rates) {
+                populateCurrencyOptions(rates.rates);
+            }
+        });
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchRates().then(rates => {
+                if (rates) {
+                    populateCurrencyOptions(rates.rates);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
