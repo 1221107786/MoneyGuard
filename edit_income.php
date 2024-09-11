@@ -50,8 +50,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['income_id'])) {
 
     $update_sql = "UPDATE income SET source='$source', amount='$amount', type='$type' WHERE id='$income_id'";
     if ($conn->query($update_sql) === TRUE) {
-        echo "<p class='success-msg'>Income updated successfully!</p>";
-        echo "<script>window.location.reload();</script>"; // Reload the page to show updated values
+        // JavaScript to show success message and reload the page
+        echo "<script>
+                alert('Income updated successfully!');
+                window.location.href = window.location.href; // Force page reload
+              </script>";
     } else {
         echo "<p class='error-msg'>Error updating income: " . $conn->error . "</p>";
     }
@@ -59,6 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['income_id'])) {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
