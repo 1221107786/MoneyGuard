@@ -1,293 +1,634 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Currency Converter</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-            background: url('https://i.gifer.com/7D7o.gif') no-repeat center center fixed;
-            background-size: cover;
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap");
+
+      :root {
+        --black: #000;
+        --orange: #ff6600;
+        --white: #fff;
+        --exchange-rate-color: #fff; /* Changed to white */
+        --input-background: rgba(0, 0, 0, 0.2);
+        --input-shadow: rgba(0, 0, 0, 0.4);
+        --input-border: #333;
+        --shadow-1: rgba(0, 0, 0, 0.3);
+        --shadow-2: rgba(0, 0, 0, 0.2);
+        --loading-bg-1: #222;
+        --loading-bg-2: #333;
+        --form-bg-gradient: linear-gradient(135deg, var(--orange), var(--black));
+        --page-bg-gradient: linear-gradient(135deg, var(--black), var(--orange));
+        --title-color: var(--white); /* Changed to white */
+      }
+
+      /* Reset and Base Styles */
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        font-family: "Outfit", sans-serif;
+        color: var(--white); /* All text in white */
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        height: 100vh;
+        background: var(--page-bg-gradient);
+        overflow: hidden;
+      }
+
+      main {
+        background: var(--form-bg-gradient);
+        padding: 30px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 480px;
+        display: grid;
+        gap: 30px;
+        box-shadow: 0 0 5px var(--shadow-1), 0 5px 10px var(--shadow-2);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      main:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px var(--shadow-1), 0 10px 20px var(--shadow-2);
+      }
+
+      h1 {
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 1.5rem;
+        color: var(--title-color); /* Updated */
+      }
+
+      .exchange-rate h5 {
+        text-transform: uppercase;
+        color: var(--title-color); /* Updated */
+      }
+
+      button {
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+
+      .controls {
+        display: grid;
+        gap: 20px;
+        position: relative;
+        color: var(--orange);
+      }
+
+      .control {
+        display: flex;
+        background: var(--input-background);
+        box-shadow: inset 0 0 3px var(--input-shadow);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .control button {
+        --image: url(https://placehold.co/30/orange/white?text=$);
+        font-weight: 600;
+        background: transparent;
+        margin-left: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .control button::before {
+        content: "";
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--orange) var(--image) center no-repeat;
+      }
+
+      .control button::after {
+        font-family: "Material Symbols Outlined";
+        font-size: 1.5rem;
+        content: "\e5cf";
+      }
+
+      .control button:hover {
+        color: var(--orange);
+      }
+
+      .control input {
+        font-size: 2.5rem;
+        text-align: end;
+        background: transparent;
+        width: 100%;
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+      }
+
+      .control input::-webkit-inner-spin-button,
+      .control input::-webkit-outer-spin-button {
+        appearance: none;
+      }
+
+      .swap-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--black);
+        color: var(--white);
+        line-height: 1;
+        box-shadow: 0 3px 5px var(--shadow-1);
+        position: absolute;
+        top: 50%;
+        inset-inline-start: 50%;
+        transform: translate(-50%, -50%);
+        transition: 0.3s;
+      }
+
+      .swap-btn:hover {
+        background: var(--orange);
+      }
+
+      .swap-btn span {
+        rotate: 90deg;
+        transition: inherit;
+      }
+
+      .swap-btn:hover span {
+        rotate: 270deg;
+      }
+
+      .exchange-rate {
+        text-align: center;
+      }
+
+      .exchange-rate h5 {
+        text-transform: uppercase;
+        color: var(--orange);
+      }
+
+      .exchange-rate span {
+        margin-top: 10px;
+        display: inline-block;
+        color: var(--exchange-rate-color);
+        font-weight: 500;
+      }
+
+      .exchange-rate span:empty {
+        min-width: 120px;
+        min-height: 1.5rem;
+      }
+
+      .drawer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--orange), var(--black));
+  padding: 20px;
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  transform: translateY(100%);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+      .drawer.show {
+        transform: none;
+      }
+
+      .title {
+        text-align: center;
+        position: relative;
+      }
+
+      .title button {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: transparent;
+        opacity: 0.5;
+      }
+
+      .title button:hover {
+        opacity: 1;
+      }
+
+      .search input {
+        width: 100%;
+        font-size: 1rem;
+        padding: 10px 20px;
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        outline-color: var(--orange);
+        color: var(--black); 
+
+      }
+
+      .currency-list {
+        list-style-type: none;
+        overflow-y: auto;
+        
+      }
+
+      .currency-list li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding-block: 5px;
+        color: var(--orange);
+      }
+
+      .currency-list li:first-child {
+        padding-block-start: 0;
+      }
+
+      /* disable click events for non list item */
+      .currency-list *:not(li) {
+        pointer-events: none;
+      }
+
+      .skeleton {
+        position: relative;
+      }
+
+      .skeleton::after {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        border-radius: 0.25rem;
+        content: "";
+        animation: loading 1s linear infinite alternate;
+      }
+
+      @keyframes loading {
+        from {
+          background: var(--loading-bg-1);
         }
-
-        header {
-            background: rgba(255, 140, 0, 0.8); /* Semi-transparent gradient */
-            padding: 1em;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-            border-bottom: 2px solid #fff;
-            position: relative;
-            z-index: 1; /* Ensure header is above the background */
+        to {
+          background: var(--loading-bg-2);
         }
+      }
 
-        h1 {
-            margin: 0;
-            font-size: 2.8em;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-shadow: 3px 3px 7px rgba(0, 0, 0, 0.7);
-            color: #fff;
-        }
+      .converted-amount {
+        text-align: center;
+        font-size: 2.5rem; /* Larger font size for prominence */
+        color: var(--white); /* Changed to white for consistency */
+        font-weight: 700; /* Bolder weight for a stronger impact */
+        letter-spacing: 0.5px; /* Slightly increased letter spacing for readability */
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow for better contrast */
+        margin-top: 20px; /* Added margin for spacing */
+        width: 100%; /* Ensures full width usage */
+        max-width: 400px; /* Limits the maximum width for better control */
+        margin-left: auto; /* Centering the element */
+        margin-right: auto; /* Centering the element */
+      }
 
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 2em auto;
-            padding: 2em;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow: hidden;
-            animation: fadeIn 1s ease-out;
-            z-index: 1; /* Ensure main content is above the background */
-        }
+      .logo-container {
+        text-align: center;
+        margin-bottom: 10px; /* Space between logo and title */
+      }
 
-        form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1em;
-    width: 100%;
+      .logo-container img.logo {
+        width: 80px; /* Smaller size */
+        height: 80px; /* Ensure round shape */
+        border-radius: 50%; /* Round shape */
+        display: block;
+        margin: 0 auto; /* Centering the logo */
+      }
+
+      .title {
+        text-align: center;
+        margin-top: 20px; /* Space between logo and title */
+      }
+
+      .title h1 {
+        font-size: 2rem; /* Adjusted size for better layout */
+        color: var(--title-color); /* White title color */
+      }
+
+      /* Back button styling */
+.back-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: var linear-gradient(135deg, var(--orange), var(--black));
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 3px 5px var(--shadow-1);
+  transition: background 0.3s, color 0.3s, transform 0.3s;
+  z-index: 10; /* Ensures the button is above other elements */
 }
 
-select {
-    width: 100%;
-    max-width: 320px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #0b0b0b;
-    border: 1px solid #ff8c00;
-    border-radius: 15px; /* Ensure rounded corners */
-    padding: 0.75em;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
+.back-btn:hover {
+  background: linear-gradient(135deg, var(--orange), var(--black));
+  color: var(--white);
+  transform: scale(1.05);
 }
 
-select:focus {
-    outline: none; /* Remove default focus outline */
-    border-color: #e07b00; /* Highlight border on focus */
+.back-btn:focus {
+  outline: none;
 }
 
-button {
-    background: linear-gradient(135deg, #ff8c00, #e07b00);
-    color: #fff;
-    cursor: pointer;
-    border: none;
-    padding: 0.75em 2em;
-    border-radius: 25px;
-    font-weight: 700;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-    position: relative;
-    overflow: hidden;
-}
-
-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300%;
-    height: 300%;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.3s ease;
-    z-index: 0;
-}
-
-button:hover::before {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-button:hover {
-    background: linear-gradient(135deg, #e07b00, #ff8c00);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
-    transform: scale(1.05);
-}
-
-#result {
-    margin-top: 1em;
-    font-size: 1.5em;
-    font-weight: 500;
-    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.7);
-}
-
-footer {
-    text-align: center;
-    margin-top: 2em;
-}
-
-footer button {
-    background: linear-gradient(135deg, #ff8c00, #e07b00);
-    color: #fff;
-    cursor: pointer;
-    border: none;
-    padding: 0.75em 2em;
-    border-radius: 25px;
-    font-weight: 700;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-footer button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 300%;
-    height: 300%;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.3s ease;
-    z-index: 0;
-}
-
-footer button:hover::before {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-footer button:hover {
-    background: linear-gradient(135deg, #e07b00, #ff8c00);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
-    transform: scale(1.05);
-}
-
-input[type="number"] {
-    width: 100%;
-    max-width: 320px;
-    padding: 0.75em;
-    font-size: 1em;
-    border: 1px solid #ff8c00;
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-    transition: all 0.3s ease;
-    outline: none; /* Remove default outline */
-}
-
-/* Focus state for input */
-input[type="number"]:focus {
-    border-color: #e07b00; /* Highlight border on focus */
-    background: rgba(255, 255, 255, 0.3);
-}
-   
+      
     </style>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/css/select2.min.css" rel="stylesheet" />
-</head>
-<body>
-    <header>
-        <h1>Currency Converter</h1>
-    </header>
+  </head>
+  
+  <body>
     <main>
-        <form id="converter-form">
-            <input type="number" id="amount" placeholder="Amount" required>
-            <select id="from-currency" class="select2">
-                <!-- Options populated via JavaScript -->
-            </select>
-            <select id="to-currency" class="select2">
-                <!-- Options populated via JavaScript -->
-            </select>
-            <button type="submit">Convert</button>
-        </form>
-        <div id="result">
-            <!-- Conversion result displayed here -->
+        <h1 class="logo-container">
+            <img src="data:image/png;base64,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" alt="Logo" class="logo">
+            <div class="logo-text">Money Guard</div>
+        </h1>
+      <div class="title">
+        <h1>Currency Converter</h1>
+      </div>
+
+      <div class="controls" id="controls">
+        <div class="control">
+          <button id="base" data-drawer>USD</button>
+          <input type="number" id="base-input" value="0" min="0" step="0.01" />
         </div>
-        <footer>
-            <button id="refresh">Refresh Rates</button>
-            <button onclick="location.href='dashboard.html'">Back</button>
-        </footer>
+        <div class="control">
+          <button id="target" data-drawer>EUR</button>
+          <input type="number" id="target-input" value="0" readonly />
+        </div>
+        <button class="swap-btn" id="swap-btn">
+          <span class="material-symbols-outlined"> sync_alt </span>
+        </button>
+      </div>
+
+      <div class="exchange-rate">
+        <h5>Exchange Rate</h5>
+        <span id="exchange-rate"></span>
+      </div>
+      <div id="converted-amount" class="converted-amount">
+        <!-- Converted amount will be displayed here -->
+      </div>
+
+      <div class="drawer" id="drawer">
+        <div class="title">
+          <button id="dismiss-btn">
+            <span class="material-symbols-outlined"> west </span>
+          </button>
+          <h3>Select Currency</h3>
+        </div>
+        <div class="search">
+          <input type="search" id="search" placeholder="Search" />
+        </div>
+        <ul class="currency-list" id="currency-list"></ul>
+      </div>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0/js/select2.min.js"></script>
-    <script>
-        const apiUrl = 'https://api.exchangerate-api.com/v4/latest/USD'; // Replace with your API endpoint
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">
+        <span class="material-symbols-outlined">west</span>
+        Back to dashboard
+      </button>
+      
+    <script> const key = "fca_live_rMwakp88F0k0BVUFVWtwtgUPdd2OEsIASXs0KFna";
 
-        async function fetchRates() {
-            try {
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                console.log('Fetched rates:', data); // Debugging line
-                return data;
-            } catch (error) {
-                console.error('Error fetching rates:', error);
-                return null;
-            }
+    const state = {
+      openedDrawer: null,
+      currencies: [],
+      filteredCurrencies: [],
+      base: "USD",
+      target: "EUR",
+      rates: {},
+      baseValue: 1,
+    };
+    
+    //* selectors
+    
+    const ui = {
+      controls: document.getElementById("controls"),
+      drawer: document.getElementById("drawer"),
+      dismissBtn: document.getElementById("dismiss-btn"),
+      currencyList: document.getElementById("currency-list"),
+      searchInput: document.getElementById("search"),
+      baseBtn: document.getElementById("base"),
+      targetBtn: document.getElementById("target"),
+      exchangeRate: document.getElementById("exchange-rate"),
+      baseInput: document.getElementById("base-input"),
+      targetInput: document.getElementById("target-input"),
+      swapBtn: document.getElementById("swap-btn"),
+    };
+    
+    //* event listeners
+    
+    const setupEventListeners = () => {
+      document.addEventListener("DOMContentLoaded", initApp);
+      ui.controls.addEventListener("click", showDrawer);
+      ui.dismissBtn.addEventListener("click", hideDrawer);
+      ui.searchInput.addEventListener("input", filterCurrency);
+      ui.currencyList.addEventListener("click", selectPair);
+      ui.baseInput.addEventListener("change", convertInput);
+      ui.swapBtn.addEventListener("click", switchPair);
+    };
+    
+    //* event handlers
+    
+    const initApp = () => {
+      fetchCurrencies();
+      fetchExchangeRate();
+    };
+    
+    const showDrawer = (e) => {
+      if (e.target.hasAttribute("data-drawer")) {
+        state.openedDrawer = e.target.id;
+        ui.drawer.classList.add("show");
+      }
+    };
+    
+    const hideDrawer = () => {
+      clearSearchInput();
+      state.openedDrawer = null;
+      ui.drawer.classList.remove("show");
+    };
+    
+    const filterCurrency = () => {
+      const keyword = ui.searchInput.value.trim().toLowerCase();
+    
+      state.filteredCurrencies = getAvailableCurrencies().filter(
+        ({ code, name }) => {
+          return (
+            code.toLowerCase().includes(keyword) ||
+            name.toLowerCase().includes(keyword)
+          );
         }
+      );
+    
+      displayCurrencies();
+    };
+    
+    const selectPair = (e) => {
+      if (e.target.hasAttribute("data-code")) {
+        const { openedDrawer } = state;
+    
+        // update the base or target in the state
+        state[openedDrawer] = e.target.dataset.code;
+    
+        // load the exchange rates then update the btns
+        loadExchangeRate();
+    
+        // close the drawer after selection
+        hideDrawer();
+      }
+    };
+    
+    const convertInput = () => {
+      state.baseValue = parseFloat(ui.baseInput.value) || 1;
+      loadExchangeRate();
+    };
+    
+    const switchPair = () => {
+      const { base, target } = state;
+      state.base = target;
+      state.target = base;
+      state.baseValue = parseFloat(ui.targetInput.value) || 1;
+      loadExchangeRate();
+    };
+    
+    //* render functions
+    
+    const displayCurrencies = () => {
+      ui.currencyList.innerHTML = state.filteredCurrencies
+        .map(({ code, name }) => {
+          return `
+          <li data-code="${code}">
+            <img src="${getImageURL(code)}" alt="${name}" />
+            <div>
+              <h4>${code}</h4>
+              <p>${name}</p>
+            </div>
+          </li>
+        `;
+        })
+        .join("");
+    };
+    
+    const displayConversion = () => {
+      updateButtons();
+      updateInputs();
+      updateExchangeRate();
+    };
+    
+    const showLoading = () => {
+      ui.controls.classList.add("skeleton");
+      ui.exchangeRate.classList.add("skeleton");
+    };
+    
+    const hideLoading = () => {
+      ui.controls.classList.remove("skeleton");
+      ui.exchangeRate.classList.remove("skeleton");
+    };
+    
+    //* helper functions
+    
+    const updateButtons = () => {
+      [ui.baseBtn, ui.targetBtn].forEach((btn) => {
+        const code = state[btn.id];
+    
+        btn.textContent = code;
+        btn.style.setProperty("--image", `url(${getImageURL(code)})`);
+      });
+    };
+    
+    const updateInputs = () => {
+      const { base, baseValue, target, rates } = state;
+    
+      const result = baseValue * rates[base][target];
+    
+      ui.targetInput.value = result.toFixed(4);
+      ui.baseInput.value = baseValue;
 
-        function populateCurrencyOptions(currencies) {
-            const fromCurrency = document.getElementById('from-currency');
-            const toCurrency = document.getElementById('to-currency');
-            
-            fromCurrency.innerHTML = '';
-            toCurrency.innerHTML = '';
-            
-            for (const [currencyCode, currencyName] of Object.entries(currencies)) {
-                const option = document.createElement('option');
-                option.value = currencyCode;
-                option.textContent = `${currencyCode} - ${currencyName}`;
-                fromCurrency.appendChild(option);
-                
-                const option2 = option.cloneNode(true);
-                toCurrency.appendChild(option2);
-            }
-
-            // Initialize Select2 after populating options
-            $('#from-currency').select2();
-            $('#to-currency').select2();
-        }
-
-        async function convertCurrency(event) {
-            event.preventDefault();
-            
-            const amount = document.getElementById('amount').value;
-            const fromCurrency = document.getElementById('from-currency').value;
-            const toCurrency = document.getElementById('to-currency').value;
-            
-            const rates = await fetchRates();
-            
-            if (rates && fromCurrency in rates.rates && toCurrency in rates.rates) {
-                const rate = rates.rates[toCurrency] / rates.rates[fromCurrency];
-                const convertedAmount = amount * rate;
-                document.getElementById('result').textContent = `Converted Amount: ${convertedAmount.toFixed(2)} ${toCurrency}`;
-            } else {
-                document.getElementById('result').textContent = 'Error converting currency.';
-            }
-        }
-
-        document.getElementById('converter-form').addEventListener('submit', convertCurrency);
-        document.getElementById('refresh').addEventListener('click', async () => {
-            const rates = await fetchRates();
-            if (rates) {
-                populateCurrencyOptions(rates.rates);
-            }
-        });
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchRates().then(rates => {
-                if (rates) {
-                    populateCurrencyOptions(rates.rates);
-                }
-            });
-        });
+      // Update the converted amount display
+      const convertedAmount = `Converted Amount: ${result.toFixed(4)} ${target}`;
+      document.getElementById('converted-amount').textContent = convertedAmount;
+    };
+    
+    const updateExchangeRate = () => {
+      const { base, target, rates } = state;
+    
+      const rate = rates[base][target].toFixed(4);
+    
+      ui.exchangeRate.textContent = `1 ${base} = ${rate} ${target}`;
+    };
+    
+    const getAvailableCurrencies = () => {
+      return state.currencies.filter(({ code }) => {
+        return state.base !== code && state.target !== code;
+      });
+    };
+    
+    const clearSearchInput = () => {
+      ui.searchInput.value = "";
+      ui.searchInput.dispatchEvent(new Event("input"));
+    };
+    
+    const getImageURL = (code) => {
+      const flag =
+        "https://wise.com/public-resources/assets/flags/rectangle/{code}.png";
+    
+      return flag.replace("{code}", code.toLowerCase());
+    };
+    
+    const loadExchangeRate = () => {
+      const { base, rates } = state;
+      if (typeof rates[base] !== "undefined") {
+        // if the base rates are in state, then show it
+        displayConversion();
+      } else {
+        // else, fetch the exchange rate first
+        fetchExchangeRate();
+      }
+    };
+    
+    //* api functions
+    
+    const fetchCurrencies = () => {
+      fetch(`https://api.freecurrencyapi.com/v1/currencies?apikey=${key}`)
+        .then((response) => response.json())
+        .then(({ data }) => {
+          state.currencies = Object.values(data);
+          state.filteredCurrencies = getAvailableCurrencies();
+          displayCurrencies();
+        })
+        .catch(console.error);
+    };
+    
+    const fetchExchangeRate = () => {
+      const { base } = state;
+    
+      showLoading();
+    
+      fetch(
+        `https://api.freecurrencyapi.com/v1/latest?apikey=${key}&base_currency=${base}`
+      )
+        .then((response) => response.json())
+        .then(({ data }) => {
+          state.rates[base] = data;
+          displayConversion();
+        })
+        .catch(console.error)
+        .finally(hideLoading);
+    };
+    
+    //* initialization
+    
+    setupEventListeners()
     </script>
-</body>
+  </body>
 </html>

@@ -1,14 +1,16 @@
 <?php
+require 'C:\xampp\htdocs\PHPMailer-master\PHPMailer-master\src\Exception.php';
+require 'C:\xampp\htdocs\PHPMailer-master\PHPMailer-master\src\PHPMailer.php';
+require 'C:\xampp\htdocs\PHPMailer-master\PHPMailer-master\src\SMTP.php';
+
 // Database connection settings
 $servername = "localhost";
 $username = "MONEYGUARD";
 $password = "Prasad123";
 $dbname = "moneyguard";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -21,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $last_name = $_POST['last_name'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hash the password
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     // Check if email already exists
     $check_email = $conn->prepare("SELECT id FROM users WHERE email = ?");
@@ -32,13 +34,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($check_email->num_rows > 0) {
         $error_message = "Email already exists. Please use another email.";
     } else {
-        // Insert user into database
-        $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, phone, email, password) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $first_name, $last_name, $phone, $email, $password);
+        // Generate and hash the verification code
+        $verification_code = rand(100000, 999999);
+        $hashed_verification_code = hash('sha256', $verification_code);
+
+        // Insert user data into the database
+        $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, phone, email, password, verification_code, verified) VALUES (?, ?, ?, ?, ?, ?, 0)");
+        $stmt->bind_param("ssssss", $first_name, $last_name, $phone, $email, $password, $hashed_verification_code);
 
         if ($stmt->execute()) {
-            header("Location: login.php"); // Redirect to login page after successful registration
-            exit();
+            // Set up PHPMailer
+            $mail = new PHPMailer\PHPMailer\PHPMailer();
+            try {
+                $mail->isSMTP();
+                $mail->Host = 'smtp.gmail.com';
+                $mail->SMTPAuth = true;
+                $mail->Username = 'pv170030@gmail.com'; // Replace with your actual email
+                $mail->Password = 'jiim uhis pkxs lwib'; // Replace with your actual password or app-specific password
+                $mail->SMTPSecure = 'tls';
+                $mail->Port = 587;
+
+                $mail->setFrom('pv170030@gmail.com', 'MoneyGuard'); // Replace with your actual sender email and name
+                $mail->addAddress($email);
+
+                $mail->isHTML(true);
+                $mail->Subject = 'Verify your email address';
+                $mail->Body    = "Greetings from MoneyGuard. This is your verification code: <strong>$verification_code</strong>";
+
+                // Send the email
+                $mail->send();
+
+                // Redirect to verify.php with the user's email
+                header("Location: verify.php?email=" . urlencode($email));
+                exit(); // Ensure no further code is executed after redirection
+            } catch (Exception $e) {
+                $error_message = "Registration failed. Email could not be sent.";
+            }
         } else {
             $error_message = "Registration failed. Please try again.";
         }
@@ -54,7 +85,6 @@ $conn->close();
 
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <title>Register</title>
@@ -65,52 +95,44 @@ $conn->close();
             background-color: #111317;
             color: #FFF;
         }
-
         .container {
             max-width: 600px;
-            width: 80%;
             margin: 50px auto;
             padding: 20px;
             border: 2px solid #c1cdcd;
             border-radius: 8px;
+            background-color: #1b1f23;
         }
-
         form {
             width: 100%;
         }
-
         label {
             font-weight: bold;
             margin-bottom: 10px;
             display: block;
+            color: #c1cdcd;
         }
-
         input {
-            width: calc(100% - 22px);
+            width: calc(100% - 20px);
+            padding: 10px;
             border: 2px solid #c1cdcd;
-            background: #FFF;
-            margin: 0 0 10px;
-            padding: 10px;
+            background-color: #FFF;
+            margin-bottom: 20px;
             border-radius: 4px;
         }
-
         button {
-            cursor: pointer;
             width: 100%;
-            border: none;
-            background: rgb(208, 147, 62);
-            color: #000;
-            margin: 10px 0 0;
             padding: 10px;
-            font-size: 15px;
+            background-color: rgb(208, 147, 62);
+            border: none;
+            color: #000;
+            font-weight: bold;
             border-radius: 4px;
         }
-
         .error-message {
             color: red;
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
-
         .login-link {
             display: block;
             text-align: center;
@@ -118,9 +140,13 @@ $conn->close();
             color: rgb(208, 147, 62);
             text-decoration: none;
         }
+
+        button.back-button {
+            background-color: #444;
+            margin-top: 10px;
+        }
     </style>
 </head>
-
 <body>
     <div class="container">
         <h2>Registration Form</h2>
@@ -131,8 +157,8 @@ $conn->close();
             <label for="first_name">First Name:</label>
             <input type="text" id="first_name" name="first_name" placeholder="First Name" required>
 
-            <label for="last_name">Second Name:</label>
-            <input type="text" id="last_name" name="last_name" placeholder="Second Name" required>
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Last Name" required>
 
             <label for="phone">Phone Number:</label>
             <input type="tel" id="phone" name="phone" placeholder="Phone Number" required>
@@ -144,9 +170,10 @@ $conn->close();
             <input type="password" id="password" name="password" placeholder="Password" required>
 
             <button type="submit" name="submit">Submit</button>
+
+            <button type="button" class="back-button" onclick="window.location.href='dashboard.html';">Back to Dashboard</button>
         </form>
         <a href="login.php" class="login-link">Already have an account? Login here</a>
     </div>
 </body>
-
 </html>
