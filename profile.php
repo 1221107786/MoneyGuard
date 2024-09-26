@@ -23,14 +23,24 @@ if (!isset($_SESSION['user_id'])) {
 
 // Retrieve user details
 $user_id = $_SESSION['user_id'];
-$stmt = $conn->prepare("SELECT firstname FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT firstname, profile_pic FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stmt->bind_result($firstname);
+$stmt->bind_result($firstname, $profile_pic);
 $stmt->fetch();
 $stmt->close();
 $conn->close();
+
+// Mapping profile picture file names to URLs
+$profile_pic_urls = [
+    "man.png" => "https://img.freepik.com/premium-vector/avatar-portrait-young-caucasian-boy-man-round-frame-vector-cartoon-flat-illustration_551425-19.jpg?w=740",
+    "woman.png" => "https://img.freepik.com/premium-vector/avatar-portrait-young-caucasian-woman-round-frame-vector-cartoon-flat-illustration_551425-22.jpg?w=740",
+];
+
+// Set a default image if no valid profile pic is selected
+$profile_pic_url = isset($profile_pic_urls[$profile_pic]) ? $profile_pic_urls[$profile_pic] : "images/profile_pics/default.png";
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -41,12 +51,12 @@ $conn->close();
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css" rel="stylesheet">
     <style>
- @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 
 :root {
-    --primary-color: #111317; /* Dark background */
-    --primary-color-light: #1f2125; /* Slightly lighter background */
-    --primary-color-extra-light: #35373b; /* Even lighter background */
+    --primary-color: #000000; /* Static black background */
+    --primary-color-light: rgba(0, 0, 0, 0.8); /* Slightly transparent black */
+    --primary-color-extra-light: rgba(0, 0, 0, 0.6); /* Even more transparent black */
     --secondary-color: #f9ac54; /* Vibrant orange */
     --secondary-color-dark: #d79447; /* Darker orange */
     --accent-orange: #ff8c42; /* Futuristic bright orange */
@@ -71,7 +81,7 @@ $conn->close();
 
 body {
     font-family: "Poppins", sans-serif;
-    background-color: var(--primary-color);
+    background-color: var(--primary-color); /* Static black */
     color: var(--text-light);
     display: flex;
     min-height: 100vh;
@@ -82,18 +92,16 @@ body {
     transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
-body.dark-mode {
-    background-color: #000;
-    color: #fff;
-}
 
 /* Sidebar Styles */
 .sidebar {
     width: 250px;
     background-color: var(--primary-color-light);
     padding: 2rem;
+    border: 3px solid var(--accent-orange); /* Orange border */
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
+    backdrop-filter: blur(8px); /* Apply blur effect */
     position: fixed;
     height: 100vh;
     overflow-y: auto;
@@ -145,14 +153,17 @@ body.dark-mode {
     color: var(--accent-white);
 }
 
+
 /* Main Content Styles */
 .main-content {
     margin-left: 270px;
     padding: 2rem;
     background-color: var(--primary-color-light);
+    border: 3px solid var(--accent-orange); /* Orange border */
     color: var(--text-light);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
+    backdrop-filter: blur(8px); /* Apply blur effect */
     max-width: calc(100% - 270px);
     margin-top: 20px;
     transition: background var(--transition-speed) ease-in-out;
@@ -193,6 +204,7 @@ body.dark-mode {
     transform: scale(1.05);
     background-color: var(--accent-orange);
 }
+
 
 /* Dashboard Cards */
 .dashboard-cards {
@@ -317,6 +329,52 @@ a:focus {
     outline: 2px dashed var(--accent-orange);
 }
 
+.profile-container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Profile Picture */
+.profile-pic-link {
+    display: inline-block;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #c1cdcd;
+    transition: border-color var(--transition-speed);
+}
+
+.profile-pic-link:hover {
+    border-color: var(--accent-orange);
+}
+
+.profile-pic-link img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+
+/* Circular Button */
+.circle-btn {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    color: var(--accent-white);
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: var(--box-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.circle-btn:hover {
+    transform: scale(1.1); /* Slightly enlarge */
+    box-shadow: 0 0 15px rgba(255, 140, 66, 0.8);
+}
 
     </style>
 </head>
@@ -332,12 +390,20 @@ a:focus {
             <li class="active"><a href="#"><i class="ri-dashboard-line"></i>Dashboard</a></li>
             <li><a href="income_settings.php"><i class="ri-wallet-line"></i>Income</a></li>
             <li><a href="expense_settings.php"><i class="ri-money-dollar-circle-line"></i>Expense</a></li>
+            <li><a href="budget.php"><i class="ri-money-dollar-circle-line"></i>Budget</a></li>
             <li><a href="logout.html"><i class="ri-logout-circle-line"></i>Logout</a></li>
             
         </ul>
     </div>
 
     <div class="main-content">
+    <div class="profile-container">
+            <a href="verify_password.php" class="circle-btn profile-pic-link">
+                <img src="<?php echo $profile_pic_url; ?>" alt="Profile Picture">
+            </a>
+        </div>
+
+
     <h2>Dashboard</h2>
     <div class="welcome-message">
       <?php if (isset($firstname)): ?>
@@ -360,7 +426,17 @@ a:focus {
                 <h2>Total Balance</h2>
                 <iframe src="totalbalance.php" style="width: 100%; height: 200px; border: none;"></iframe>
             </div>
+           
         </div>
+        <h2>Recent Transactions</h2>
+    <div class="income-summary" id="income-summary">
+    <iframe src="transactions.php" style="width: 100%; height:300px; border: none;"></iframe>
+</div>
+
+<h2>Budget Alert</h2>
+    <div class="income-summary" id="income-summary">
+    <iframe src="budget_alert.php" style="width: 100%; height:500px; border: none;"></iframe>
+</div>
         <h2>Income Summary</h2>
     <div class="income-summary" id="income-summary">
     <iframe src="income_summary.php" style="width: 100%; height: 500px; border: none;"></iframe>
@@ -372,7 +448,7 @@ a:focus {
     <iframe src="expense_summary.php" style="width: 100%; height: 500px; border: none;"></iframe>
 </div>
 
-        <div class="chart-container">
+      
         <h2> Income vs Expenses Comparison</h2>
         <div class="comparison-chart" id="comparison-chart">
             <iframe src="comparison_chart.php" style="width: 100%; height: 500px; border: none;"></iframe>
@@ -385,70 +461,6 @@ a:focus {
 
 
 
-    <script>
-        // Retrieve and display income data
-        document.addEventListener('DOMContentLoaded', function() {
-            const incomeData = localStorage.getItem('incomeData');
-            const incomeDetails = document.getElementById('income-details');
-            const expenseData = localStorage.getItem('expenseData');
-            const expenseDetails = document.getElementById('expense-details');
-
-            if (incomeData) {
-                const { amount, source, type, budget } = JSON.parse(incomeData);
-                incomeDetails.innerHTML = `
-                    <strong>Amount:</strong> $${amount}<br>
-                    <strong>Source:</strong> ${source}<br>
-                    <strong>Type:</strong> ${type}<br>
-                    <strong>Budget Allocation:</strong> ${budget}%
-                `;
-            } else {
-                incomeDetails.textContent = 'No income data available.';
-            }
-
-            if (expenseData) {
-                const { amount, category, type } = JSON.parse(expenseData);
-                expenseDetails.innerHTML = `
-                    <strong>Amount:</strong> $${amount}<br>
-                    <strong>Category:</strong> ${category}<br>
-                    <strong>Type:</strong> ${type}
-                `;
-            } else {
-                expenseDetails.textContent = 'No expense data available.';
-            }
-
-            // Prepare data for the chart
-            const incomeAmount = incomeData ? JSON.parse(incomeData).amount : 0;
-            const expenseAmount = expenseData ? JSON.parse(expenseData).amount : 0;
-
-            // Chart.js code
-            const ctx = document.getElementById('income-vs-expense-chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Income', 'Expenses'],
-                    datasets: [{
-                        label: 'Amount ($)',
-                        data: [incomeAmount, expenseAmount],
-                        backgroundColor: [
-                            'rgba(54, 162, 235, 0.2)', // Blue for income
-                            'rgba(255, 99, 132, 0.2)'  // Red for expenses
-                        ],
-                        borderColor: [
-                            'rgba(54, 162, 235, 1)', // Blue border for income
-                            'rgba(255, 99, 132, 1)'  // Red border for expenses
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        });
-    </script>
+   
 </body>
 </html>
